@@ -1,9 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { setBaseUrl, setAuthTokenGetter } from "@workspace/api-client-react";
 
-// Set the API base URL when the module loads
-setBaseUrl("http://localhost:8080");
-
 interface AuthUser {
   userId: string;
   username: string;
@@ -32,7 +29,7 @@ const AuthContext = createContext<AuthContextValue>({
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => {      
+  const [user, setUser] = useState<AuthUser | null>(() => {
     try {
       const stored = localStorage.getItem(AUTH_KEY);
       return stored ? JSON.parse(stored) : null;
@@ -41,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   });
 
-  const updateApiToken = useCallback((token: string | null) => { 
+  const updateApiToken = useCallback((token: string | null) => {
     if (token) {
       setAuthTokenGetter(async () => token);
     } else {
@@ -56,7 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, updateApiToken]);
 
   const login = useCallback((userData: AuthUser) => {
-    localStorage.setItem(AUTH_KEY, JSON.stringify(userData));    
+    localStorage.setItem(AUTH_KEY, JSON.stringify(userData));
     setUser(userData);
     updateApiToken(userData.token);
   }, [updateApiToken]);
