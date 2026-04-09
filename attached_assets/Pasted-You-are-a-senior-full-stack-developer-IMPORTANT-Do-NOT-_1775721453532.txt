@@ -1,0 +1,91 @@
+You are a senior full-stack developer.
+
+IMPORTANT:
+
+* Do NOT create a new project or rewrite the app from scratch
+* Do NOT change the overall architecture
+* ONLY make fixes and improvements inside the EXISTING uploaded zip project
+* Preserve all existing files and structure, modify only where necessary
+
+Project Context:
+This is an AI Daily Speaking Coach web app with authentication, speech recording, AI feedback, and dashboard features.
+
+Core Features Expected:
+
+* User authentication (signup/login with email, username, password, OTP)
+* User profile (student/professional + purpose)
+* Daily speaking topic generator
+* Voice recording + playback
+* AI-based feedback (like Google Assistant voice response)
+* Timer (minimum speaking time: 90 seconds)
+* Session history (store and replay recordings)
+* Leaderboard system
+* Rewards/Badges system (without emojis at start)
+* Notifications
+* Dark/light mode toggle
+
+Fix the following issues in the EXISTING CODE:
+
+1. Authentication:
+
+* Registration failing (email, username, OTP not working)
+* Enforce password rules (minimum 8 characters)
+* Proper validation and error handling
+
+2. Recording & Timer:
+
+* Timer continues even after stopping recording → fix this
+* Timer mismatch (33 sec recorded vs 1 min spoken) → fix accuracy
+* Enforce minimum speaking time = 90 seconds before submission
+
+3. AI Feedback:
+
+* Feedback button not working → debug API/backend integration
+* Ensure speech-to-text + feedback pipeline works correctly
+
+4. Daily Topic Generator:
+
+* No topic is generated → fix logic or API
+* Ensure a new topic appears daily
+
+5. Session Storage:
+
+* Previous sessions not saved → fix DB/storage logic
+* Ensure sessions show correct dates (Apr 9 sessions visible)
+* Enable playback of recorded audio
+
+6. Dashboard Errors:
+
+* Progress page error → fix routing/API
+* Leaderboard error → fix integration
+* Speaking tips error → fix component/API
+
+7. UI/UX Fixes:
+
+* Remove emojis from badge titles
+* Fix recent sessions not updating
+* Improve error messages (clear and user-friendly)
+* Ensure dark/light mode toggle works
+
+8. Code Quality:
+
+* Fix all runtime and console errors
+* Proper async/await and error handling
+* Clean and minimal changes only (no rewrite)
+* Add comments where needed
+
+9. Optional Improvements:
+
+* Add loading indicators
+* Add success/error notifications
+* Improve responsiveness
+
+Output Requirements:
+
+* Provide ONLY the modified files or code snippets (not a full rewrite)
+* Clearly explain what was fixed and why
+* Mention any new dependencies added (if any)
+* Ensure the app runs correctly after fixes
+
+Reminder:
+Work strictly within the existing uploaded zip project. Do NOT generate a new app.

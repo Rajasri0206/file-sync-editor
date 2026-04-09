@@ -3,20 +3,31 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AI Daily Speaking Coach API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: sessions
+    description: Recording sessions
+  - name: feedback
+    description: AI feedback
+  - name: topics
+    description: Daily speaking topics
+  - name: progress
+    description: User progress
+  - name: gamification
+    description: XP, badges, leaderboard
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +35,294 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/register:
+    post:
+      operationId: registerUser
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /sessions/upload:
+    post:
+      operationId: uploadAudio
+      tags: [sessions]
+      summary: Upload audio recording
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/UploadAudioBody"
+      responses:
+        "201":
+          description: Uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadAudioResponse"
+
+  /sessions/{sessionId}/analyze:
+    post:
+      operationId: analyzeSession
+      tags: [sessions]
+      summary: Analyze a session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Analysis complete
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionAnalysis"
+
+  /sessions:
+    get:
+      operationId: listSessions
+      tags: [sessions]
+      summary: List sessions for a user
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListSessionsResponse"
+
+  /sessions/{sessionId}:
+    get:
+      operationId: getSession
+      tags: [sessions]
+      summary: Get session detail
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /feedback/{sessionId}:
+    get:
+      operationId: getSessionFeedback
+      tags: [feedback]
+      summary: Get feedback for a session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /feedback/{sessionId}/audio:
+    post:
+      operationId: generateVoiceFeedback
+      tags: [feedback]
+      summary: Generate voice feedback for a session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceFeedbackResponse"
+
+  /topics/daily:
+    get:
+      operationId: getDailyTopic
+      tags: [topics]
+      summary: Get daily speaking topic
+      parameters:
+        - name: goal
+          in: query
+          schema:
+            type: string
+            enum: [general, interview, public_speaking, casual, storytelling]
+            default: general
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyTopic"
+
+  /progress/{userId}:
+    get:
+      operationId: getUserProgress
+      tags: [progress]
+      summary: Get user progress data points
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProgress"
+
+  /progress/{userId}/summary:
+    get:
+      operationId: getUserProgressSummary
+      tags: [progress]
+      summary: Get user progress summary
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProgressSummary"
+
+  /users/{userId}/stats:
+    get:
+      operationId: getUserStats
+      tags: [gamification]
+      summary: Get user XP stats and badges
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserStats"
+
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [gamification]
+      summary: Get leaderboard
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeaderboardResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +333,559 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    RegisterBody:
+      type: object
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum: [student, professional]
+          default: student
+        purpose:
+          type: string
+          enum: [general, interview, public_speaking, casual, storytelling]
+          default: general
+      required:
+        - email
+        - username
+        - password
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        userId:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        purpose:
+          type: string
+      required:
+        - token
+        - userId
+        - username
+        - email
+        - role
+        - purpose
+
+    UploadAudioBody:
+      type: object
+      properties:
+        audio:
+          type: string
+          format: binary
+        userId:
+          type: string
+        topic:
+          type: string
+      required:
+        - audio
+        - userId
+
+    UploadAudioResponse:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        userId:
+          type: string
+        audioPath:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - sessionId
+        - userId
+        - audioPath
+        - status
+        - createdAt
+
+    SpeechScores:
+      type: object
+      properties:
+        fluencyScore:
+          type: number
+        pauseScore:
+          type: number
+        vocabularyScore:
+          type: number
+        confidenceScore:
+          type: number
+        overallScore:
+          type: number
+        wordsPerMinute:
+          type: number
+        uniqueWordRatio:
+          type: number
+        fillerWordCount:
+          type: integer
+        fillerWords:
+          type: array
+          items:
+            type: string
+        totalWords:
+          type: integer
+        durationSeconds:
+          type: number
+      required:
+        - fluencyScore
+        - pauseScore
+        - vocabularyScore
+        - confidenceScore
+        - overallScore
+        - wordsPerMinute
+        - uniqueWordRatio
+        - fillerWordCount
+        - fillerWords
+        - totalWords
+        - durationSeconds
+
+    SessionAnalysis:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        transcript:
+          type: string
+        scores:
+          $ref: "#/components/schemas/SpeechScores"
+        feedback:
+          type: string
+        strengths:
+          type: array
+          items:
+            type: string
+        improvements:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        analyzedAt:
+          type: string
+          format: date-time
+          nullable: true
+        xpEarned:
+          type: integer
+        newBadges:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+              icon:
+                type: string
+              earnedAt:
+                type: string
+                format: date-time
+                nullable: true
+            required:
+              - id
+              - name
+              - description
+              - icon
+        newLevel:
+          type: integer
+          nullable: true
+      required:
+        - sessionId
+        - transcript
+        - scores
+        - feedback
+        - strengths
+        - improvements
+        - status
+        - xpEarned
+        - newBadges
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: string
+        audioPath:
+          type: string
+        status:
+          type: string
+        transcript:
+          type: string
+          nullable: true
+        fluencyScore:
+          type: number
+          nullable: true
+        pauseScore:
+          type: number
+          nullable: true
+        vocabularyScore:
+          type: number
+          nullable: true
+        confidenceScore:
+          type: number
+          nullable: true
+        overallScore:
+          type: number
+          nullable: true
+        wordsPerMinute:
+          type: number
+          nullable: true
+        uniqueWordRatio:
+          type: number
+          nullable: true
+        fillerWordCount:
+          type: integer
+          nullable: true
+        totalWords:
+          type: integer
+          nullable: true
+        durationSeconds:
+          type: number
+          nullable: true
+        xpEarned:
+          type: integer
+          nullable: true
+        topicUsed:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        analyzedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - userId
+        - audioPath
+        - status
+        - createdAt
+
+    ListSessionsResponse:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Session"
+        total:
+          type: integer
+      required:
+        - sessions
+        - total
+
+    SessionDetail:
+      type: object
+      properties:
+        session:
+          $ref: "#/components/schemas/Session"
+        feedback:
+          type: string
+          nullable: true
+        strengths:
+          type: array
+          items:
+            type: string
+        improvements:
+          type: array
+          items:
+            type: string
+        scores:
+          $ref: "#/components/schemas/SpeechScores"
+          nullable: true
+      required:
+        - session
+        - strengths
+        - improvements
+
+    FeedbackDetail:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        feedback:
+          type: string
+        strengths:
+          type: array
+          items:
+            type: string
+        improvements:
+          type: array
+          items:
+            type: string
+        scores:
+          $ref: "#/components/schemas/SpeechScores"
+        transcript:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - sessionId
+        - feedback
+        - strengths
+        - improvements
+        - scores
+        - transcript
+        - createdAt
+
+    VoiceFeedbackResponse:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        audioBase64:
+          type: string
+        mimeType:
+          type: string
+        text:
+          type: string
+        isFallback:
+          type: boolean
+      required:
+        - sessionId
+        - audioBase64
+        - mimeType
+        - text
+        - isFallback
+
+    DailyTopic:
+      type: object
+      properties:
+        topic:
+          type: string
+        description:
+          type: string
+        tips:
+          type: array
+          items:
+            type: string
+        suggestedDuration:
+          type: integer
+        goal:
+          type: string
+      required:
+        - topic
+        - description
+        - tips
+        - suggestedDuration
+        - goal
+
+    ProgressDataPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+        sessionId:
+          type: integer
+        fluencyScore:
+          type: number
+          nullable: true
+        pauseScore:
+          type: number
+          nullable: true
+        vocabularyScore:
+          type: number
+          nullable: true
+        confidenceScore:
+          type: number
+          nullable: true
+        overallScore:
+          type: number
+          nullable: true
+        wordsPerMinute:
+          type: number
+          nullable: true
+      required:
+        - date
+        - sessionId
+
+    UserProgress:
+      type: object
+      properties:
+        userId:
+          type: string
+        dataPoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProgressDataPoint"
+        totalSessions:
+          type: integer
+        daysTracked:
+          type: integer
+      required:
+        - userId
+        - dataPoints
+        - totalSessions
+        - daysTracked
+
+    UserProgressSummary:
+      type: object
+      properties:
+        userId:
+          type: string
+        totalSessions:
+          type: integer
+        avgFluencyScore:
+          type: number
+          nullable: true
+        avgPauseScore:
+          type: number
+          nullable: true
+        avgVocabularyScore:
+          type: number
+          nullable: true
+        avgConfidenceScore:
+          type: number
+          nullable: true
+        avgOverallScore:
+          type: number
+          nullable: true
+        bestSession:
+          type: integer
+          nullable: true
+        latestSession:
+          type: integer
+          nullable: true
+        streak:
+          type: integer
+        improvementPercent:
+          type: number
+          nullable: true
+      required:
+        - userId
+        - totalSessions
+        - streak
+
+    UserStats:
+      type: object
+      properties:
+        userId:
+          type: string
+        xp:
+          type: integer
+        level:
+          type: integer
+        levelName:
+          type: string
+        xpToNextLevel:
+          type: integer
+        xpForCurrentLevel:
+          type: integer
+        currentStreak:
+          type: integer
+        longestStreak:
+          type: integer
+        lastActiveDate:
+          type: string
+          nullable: true
+        badges:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+              icon:
+                type: string
+              earnedAt:
+                type: string
+                format: date-time
+                nullable: true
+            required:
+              - id
+              - name
+              - description
+              - icon
+      required:
+        - userId
+        - xp
+        - level
+        - levelName
+        - xpToNextLevel
+        - xpForCurrentLevel
+        - currentStreak
+        - longestStreak
+        - badges
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+        userId:
+          type: string
+        username:
+          type: string
+        xp:
+          type: integer
+        level:
+          type: integer
+        levelName:
+          type: string
+        currentStreak:
+          type: integer
+      required:
+        - rank
+        - userId
+        - username
+        - xp
+        - level
+        - levelName
+        - currentStreak
+
+    LeaderboardResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: "#/components/schemas/LeaderboardEntry"
+        updatedAt:
+          type: string
+      required:
+        - entries
+        - updatedAt
